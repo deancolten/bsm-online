@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Edit{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" class="form-control" name="title" id="title" value="{{ request.form['title'] or episode.title}}" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" name="description" id="description" value={{episode.get_description_text()}} required></input>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" name="not_private" id="not_private" {% if not episode.private %}checked{% endif %}>
+            <label class="form-check-label" for="not_private">
+                Public
+            </label>
+        </div>
+        <button type="submit" class="btn btn-dark my-2">Apply Changes</button>
+    </form>
+{% endblock %}

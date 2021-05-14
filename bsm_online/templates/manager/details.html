@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}{{podcast['podcast_name']}}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+{% for ep in eps %}
+<div class="card my-2 w-50">
+  <div class="card-body">
+    <h5 class="card-title">{{ ep.title }}</h5>
+    <div class="about">Description: {{ep.get_description_text()}}</div>
+    <div class="d-flex flex-row justify-content-between">
+      <p class="mb-0">Published: {{ep.get_date().date()}}</p>
+      <div>
+        {% if ep.private %}
+        <a class="btn btn-outline-secondary btn-sm mr-4"
+          href="{{ url_for('manager.publish_conf', id=podcast['id'], epid=ep.id) }}">Publish</a>
+        {% else %}
+        <a class="btn btn-outline-danger btn-sm mr-4"
+          href="{{ url_for('manager.publish_conf', id=podcast['id'], epid=ep.id) }}">Un-Publish</a>
+        {%endif%}
+        <a class="btn btn-dark btn-sm mr-4"
+          href="{{ url_for('manager.episode_edit', id=podcast['id'], epid=ep.id) }}">Edit</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

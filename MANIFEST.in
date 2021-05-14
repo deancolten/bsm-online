@@ -1,0 +1,4 @@
+include BSM-Online/schema.sql
+graft BSM-Online/static
+graft BSM-Online/templates
+global-exclude *.pyc

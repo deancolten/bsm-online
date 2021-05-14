@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS podcast;
+
+CREATE TABLE user (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL
+);
+
+CREATE TABLE podcast (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  podcast_id INTEGER NOT NULL,
+  token TEXT NOT NULL,
+  podcast_name TEXT NOT NULL,
+  user_id INTEGER,
+  manager_blob, BLOB,
+  FOREIGN KEY (user_id) REFERENCES user (id)
+);

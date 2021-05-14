@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<form method="post" class="col-md-5 mx-auto my-5">
+  <div class="text-center">
+
+    {%if episode.private %}
+    <h3>Are you sure you want to make {{episode.title}} public?</h3>
+    <input id="public" name="public" type="hidden" value="public">
+    <button type="submit" class="btn btn-danger btn-lg btn-block">Yes</button>
+
+    {%else%}
+    <h3>Are you sure you want to make {{episode.title}} private?</h3>
+    <input id="private" name="private" type="hidden" value="private">
+    <button type="submit" class="btn btn-danger btn-lg btn-block">Yes</button>
+    {%endif%}
+
+  </div>
+</form>
+{% endblock %}
