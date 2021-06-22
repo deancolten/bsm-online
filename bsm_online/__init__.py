@@ -30,6 +30,9 @@ def create_app(test_config=None):
     from . import auth
     app.register_blueprint(auth.bp)
 
+    from . import url_test
+    app.register_blueprint(url_test.bp)
+
     from . import manager
     app.register_blueprint(manager.bp)
     app.add_url_rule('/', endpoint='manager')
