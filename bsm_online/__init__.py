@@ -34,6 +34,9 @@ def create_app(test_config=None):
     app.register_blueprint(manager.bp)
     app.add_url_rule('/', endpoint='manager')
 
+    from . import files
+    app.register_blueprint(files.bp)
+
     # a simple page that says hello
     @app.route('/hello')
     def hello():

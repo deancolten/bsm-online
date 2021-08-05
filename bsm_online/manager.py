@@ -2,10 +2,10 @@ import os
 import glob
 import pickle
 from flask import (
-    Blueprint, flash, g, session, redirect, render_template, request, url_for
+    Blueprint, flash, g, session, current_app, redirect, render_template, request, url_for
 )
 from werkzeug.exceptions import abort
-
+from time import time
 from bsm_online.auth import login_required
 from bsm_online.db import get_db
 
@@ -14,13 +14,8 @@ from bsm import Manager, Episode
 bp = Blueprint('manager', __name__)
 
 
-# FUNCTIONS********
-# ***************************
-# ***************************************
-# ****************************************************
-# **************************************************************
-# *************************************************************************
-# ************************************************************************************
+# ********FUNCTIONS********
+
 
 def get_podcast(id):
     podcast = get_db().execute(
@@ -187,17 +182,18 @@ def delete(id):
 @ bp.route('/batch_upload', methods=('GET', 'POST'))
 @ login_required
 def batch_upload():
+    id = g.user['id']
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+
     # ****POST****
-
-    # TERRIBLE way of deleteing files after upload.
-    # Doing a remove at the end of the function throws an exception.
-    # Maybe changeing the scope of the file.save() and os.remove()??
-    uploads_to_rem = glob.glob('uploads/*')
-    for f in uploads_to_rem:
-        os.remove(f)
-    # *********************
-
     if request.method == 'POST':
+        # TERRIBLE way of deleteing files after upload.
+        # Doing a remove at the end of the function throws an exception.
+        # Maybe changeing the scope of the file.save() and os.remove()??
+        # *********************
+        # uploads_to_rem = glob.glob(f"{upload_folder}/*")
+        # for f in uploads_to_rem:
+        #     os.remove(f)
         # First find all podcast IDs in the request.form
         form_pods = []
         for i in request.form:
@@ -210,6 +206,7 @@ def batch_upload():
 
         # Get podcast, create manager
         for id_value in form_pods:
+            p_title = request.form[f"{id_value}_title"]
 
             if f"{id_value}_post" not in request.form.keys():
                 continue
@@ -225,22 +222,28 @@ def batch_upload():
                 if u_file and not u_file.filename.lower().endswith('.mp3'):
                     flash("Filetype must be .mp3")
                     return redirect(url_for('manager.batch_upload'))
-                u_file.save(os.path.join('uploads', F"{id_value}_file.mp3"))
+                filename = f"{id}-{id_value}-{int(time())}.mp3"
+                u_file.save(os.path.join(
+                    upload_folder, filename))
             except Exception as e:
                 print('Batch Upload Error - ', type(e))
 
         # Upload Episode
-            e_title = request.form[f"{id_value}_title"]
+            file_url = f"{request.url_root[:-1]}{str(url_for('files.return_file', path=filename))}"
+            print(file_url)
+            e_title = p_title
             if e_title == '':
                 e_title = 'Untitled Episode'
             e = Episode(
                 **{
                     'title': e_title,
-                    'description': request.form[f"{id_value}_description"]
+                    'description': request.form[f"{id_value}_description"],
+                    'audio_url': file_url
                 }
             )
-            bsmr = manager.post_episode(episode=e, audio_file=os.path.join(
-                'uploads', F"{id_value}_file.mp3"))
+
+            bsmr = manager.post_episode(episode=e)
+            print(bsmr)
 
         # Make Public if checked
             if f"{id_value}_public" in request.form.keys():
@@ -259,8 +262,8 @@ def batch_upload():
     return render_template('manager/batch_upload.html', podcasts=podcasts)
 
 
-@bp.route('/<int:id>/details/<int:epid>/publish_conf', methods=('GET', 'POST'))
-@login_required
+@ bp.route('/<int:id>/details/<int:epid>/publish_conf', methods=('GET', 'POST'))
+@ login_required
 def publish_conf(id, epid):
     if request.method == 'POST':
         for i in request.form.keys():
@@ -284,8 +287,8 @@ def publish_conf(id, epid):
     return render_template('manager/publish_conf.html', episode=ep)
 
 
-@bp.route('/<int:id>/details/<int:epid>/edit', methods=('GET', 'POST'))
-@login_required
+@ bp.route('/<int:id>/details/<int:epid>/edit', methods=('GET', 'POST'))
+@ login_required
 def episode_edit(id, epid):
     if request.method == 'POST':
         pod = get_podcast(id)
