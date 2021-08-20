@@ -183,7 +183,6 @@ def delete(id):
 @ login_required
 def batch_upload():
     id = g.user['id']
-    upload_folder = current_app.config['UPLOAD_FOLDER']
 
     # ****POST****
     if request.method == 'POST':
@@ -195,6 +194,7 @@ def batch_upload():
         # for f in uploads_to_rem:
         #     os.remove(f)
         # First find all podcast IDs in the request.form
+        upload_folder = current_app.config['UPLOAD_FOLDER']
         form_pods = []
         for i in request.form:
             try:
@@ -229,8 +229,8 @@ def batch_upload():
                 print('Batch Upload Error - ', type(e))
 
         # Upload Episode
-            file_url = f"{request.url_root[:-1]}{str(url_for('files.return_file', path=filename))}"
-            print(file_url)
+            file_url = f"https://{current_app.config['HOST_NAME']}/media/{filename}"
+            print("File URL - ", file_url)
             e_title = p_title
             if e_title == '':
                 e_title = 'Untitled Episode'
